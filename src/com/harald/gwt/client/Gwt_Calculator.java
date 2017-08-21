@@ -113,18 +113,30 @@ public class Gwt_Calculator implements EntryPoint {
 
 		resultFlexTable.setText(0, 0, "History");
 
+		// Setting up keypad
 		int buttonName = 9;
-		for (int i = 2; i >= 0; i--) {
+		for (int i = 0; i <= 2; i++) {
 			for (int j = 2; j >= 0; j--) {
 				Button button = new Button("" + buttonName);
+				button.setPixelSize(50, 50);
 				buttonsFlexitable.setWidget(i, j, button);
 				buttons.add(button);
 				buttonName--;
 			}
 		}
-		Button button = new Button("" + buttonName);
-		buttonsFlexitable.setWidget(3, 0,button);
-		buttons.add(button);
+		Button button0 = new Button("" + buttonName);
+		button0.setPixelSize(50, 50);
+		buttonsFlexitable.setWidget(3, 0, button0);
+		Button comma = new Button("" + ".");
+		comma.setPixelSize(50, 50);
+		buttonsFlexitable.setWidget(3, 1, comma);
+		Button backButton = new Button("del");
+		backButton.setPixelSize(50, 50);
+		buttonsFlexitable.setWidget(3, 2, backButton);
+
+		buttons.add(button0);
+		buttons.add(comma);
+		buttons.add(backButton);
 
 		resultPanel.add(resultFlexTable);
 
@@ -168,9 +180,7 @@ public class Gwt_Calculator implements EntryPoint {
 
 			}
 		});
-		
-		
-		
+
 		operand2TextBox.addKeyDownHandler(new KeyDownHandler() {
 
 			@Override
@@ -194,20 +204,21 @@ public class Gwt_Calculator implements EntryPoint {
 			buttons.get(i).addClickHandler(new ClickHandler() {
 
 				public void onClick(ClickEvent event) {
-					numPadPressed(((Button) event.getSource()).getText());
+					if (((Button) event.getSource()).getText().equals("del")) {
+						removeLastDigit();
+					} else {
+						numPadPressed(((Button) event.getSource()).getText());
+					}
 				}
 			});
 		}
 	}
 
 	private void numPadPressed(String keyPressed) {
-		String temp = "";
 		if (isoperand1TextBoxSelected) {
-			temp = operand1TextBox.getText() + keyPressed;
-			operand1TextBox.setText(temp);
+			operand1TextBox.setText(operand1TextBox.getText() + keyPressed);
 		} else {
-			temp = operand2TextBox.getText() + keyPressed;
-			operand2TextBox.setText(temp);
+			operand2TextBox.setText(operand2TextBox.getText() + keyPressed);
 		}
 	}
 
@@ -221,4 +232,14 @@ public class Gwt_Calculator implements EntryPoint {
 		resultFlexTable.setText(row, 1, question);
 		resultFlexTable.setText(row, 2, answer);
 	}
+
+	private void removeLastDigit() {
+
+		if (isoperand1TextBoxSelected) {
+			operand1TextBox.setText(operand1TextBox.getText().substring(0, operand1TextBox.getText().length() - 1));
+		} else {
+			operand2TextBox.setText(operand2TextBox.getText().substring(0, operand2TextBox.getText().length() - 1));
+		}
+	}
+
 }
