@@ -13,7 +13,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.ValueBoxBase.TextAlignment;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.harald.gwt.client.Calculator.CalculatorListener;
@@ -26,14 +25,15 @@ public class Gwt_Calculator implements EntryPoint, CalculatorListener {
 	private VerticalPanel mainPanel = new VerticalPanel();
 	private VerticalPanel resultPanel = new VerticalPanel();
 	private HorizontalPanel addPanel = new HorizontalPanel();
-	private TextBox operand1TextBox = new TextBox();
-	private TextBox operand2TextBox = new TextBox();
-	private TextBox operatorTextBox = new TextBox();
+	private DisplayTextBox operand1TextBox = new DisplayTextBox();
+	private DisplayTextBox operand2TextBox = new DisplayTextBox();
+	private DisplayTextBox operatorTextBox = new DisplayTextBox();
 	private FlexTable resultFlexTable = new FlexTable();
 	private Calculator calculator = new Calculator();
 	private FlexTable buttonsFlexitable = new FlexTable();
 	private ArrayList<Button> buttons = new ArrayList<>();
-	private boolean isoperand1TextBoxSelected = true;
+	private String numbersRegex = "-?[0-9]+";
+	private String operatorRegex = "[-+*/]";
 
 	/**
 	 * Entry point method.
@@ -47,9 +47,11 @@ public class Gwt_Calculator implements EntryPoint, CalculatorListener {
 	private void calculate() {
 
 		final String operator = operatorTextBox.getText();
+		
 
-		if (!isDouble(operand1TextBox.getText().trim()) || !isDouble(operand2TextBox.getText().trim())) {
-			Window.alert("One of the operands is not an number");
+
+		if (!isDouble(operand1TextBox.getText().trim()) || !isDouble(operand2TextBox.getText().trim()) || !isOperator(operator)) {
+			Window.alert("operands or operator is not supported");
 			return;
 		}
 
@@ -57,7 +59,7 @@ public class Gwt_Calculator implements EntryPoint, CalculatorListener {
 		double operand2 = Double.parseDouble(operand2TextBox.getText().trim());
 
 		calculator.setListener(this);
-		calculator.setOps(operand1, operand2, operator);
+		calculator.setOperands(operand1, operand2, operator);
 		calculator.calculate();
 
 		resetCalculator();
@@ -66,14 +68,23 @@ public class Gwt_Calculator implements EntryPoint, CalculatorListener {
 
 	// Checks if a String could be seen as an double
 	private boolean isDouble(String input) {
-		String regex = "[0-9]+";
 
-		if (input.matches(regex)) {
+		if (input.matches(numbersRegex)) {
 			return true;
 		} else {
 			return false;
 		}
 	}
+	
+	// Checks if a String could be seen as an operator
+	private boolean isOperator(String operator) {
+		if (operator.matches(operatorRegex)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
 
 	private void setUpLayout() {
 
@@ -203,7 +214,7 @@ public class Gwt_Calculator implements EntryPoint, CalculatorListener {
 						operatorTextBox.setFocus(true);
 					} else if (operand2TextBox.getText().isEmpty()) {
 						operand2TextBox.setFocus(true);
-						isoperand1TextBoxSelected = false;
+						operand1TextBox.setFocus(false);
 					} else {
 						calculate();
 					}
@@ -217,8 +228,8 @@ public class Gwt_Calculator implements EntryPoint, CalculatorListener {
 
 			@Override
 			public void onClick(ClickEvent event) {
-				isoperand1TextBoxSelected = true;
-
+				operand1TextBox.setFocus(true);
+				operand2TextBox.setFocus(false);
 			}
 		});
 
@@ -239,7 +250,7 @@ public class Gwt_Calculator implements EntryPoint, CalculatorListener {
 						operatorTextBox.setFocus(true);
 					} else if (operand1TextBox.getText().isEmpty()) {
 						operand1TextBox.setFocus(true);
-						isoperand1TextBoxSelected = true;
+						operand2TextBox.setFocus(false);			
 					} else {
 						calculate();
 					}
@@ -252,7 +263,8 @@ public class Gwt_Calculator implements EntryPoint, CalculatorListener {
 
 			@Override
 			public void onClick(ClickEvent event) {
-				isoperand1TextBoxSelected = false;
+				operand1TextBox.setFocus(false);
+				operand2TextBox.setFocus(true);
 			}
 		});
 
@@ -264,10 +276,12 @@ public class Gwt_Calculator implements EntryPoint, CalculatorListener {
 						removeLastDigit();
 					} else if (((Button) event.getSource()).getTitle().equalsIgnoreCase("Operator")) {
 
-						if (isoperand1TextBoxSelected) {
-							isoperand1TextBoxSelected = false;
+						if (operand1TextBox.isFocused()) {
+							operand1TextBox.setFocus(false);
+							operand2TextBox.setFocus(true);
 						} else {
-							isoperand1TextBoxSelected = true;
+							operand1TextBox.setFocus(true);
+							operand2TextBox.setFocus(false);
 						}
 
 						operatorPressed(((Button) event.getSource()).getText());
@@ -291,10 +305,11 @@ public class Gwt_Calculator implements EntryPoint, CalculatorListener {
 			public void onKeyDown(KeyDownEvent event) {
 				if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
 					if (operand1TextBox.getText().isEmpty()) {
-						isoperand1TextBoxSelected = true;
+						operand1TextBox.setFocus(true);
+						operand2TextBox.setFocus(false);
 						operand1TextBox.setFocus(true);
 					} else if (operand2TextBox.getText().isEmpty()) {
-						isoperand1TextBoxSelected = false;
+						operand1TextBox.setFocus(false);
 						operand2TextBox.setFocus(true);
 					} else {
 						calculate();
@@ -310,7 +325,7 @@ public class Gwt_Calculator implements EntryPoint, CalculatorListener {
 	}
 
 	private void numPadPressed(String keyPressed) {
-		if (isoperand1TextBoxSelected) {
+		if (operand1TextBox.isFocused()) {
 			operand1TextBox.setText(operand1TextBox.getText() + keyPressed);
 		} else {
 			operand2TextBox.setText(operand2TextBox.getText() + keyPressed);
@@ -335,7 +350,7 @@ public class Gwt_Calculator implements EntryPoint, CalculatorListener {
 
 	private void removeLastDigit() {
 
-		if (isoperand1TextBoxSelected) {
+		if (operand1TextBox.isFocused()) {
 			operand1TextBox.setText(operand1TextBox.getText().substring(0, operand1TextBox.getText().length() - 1));
 		} else {
 			operand2TextBox.setText(operand2TextBox.getText().substring(0, operand2TextBox.getText().length() - 1));
@@ -344,7 +359,6 @@ public class Gwt_Calculator implements EntryPoint, CalculatorListener {
 
 	@Override
 	public void result(String result) {
-		// Window.alert(result);
 		addToResultTable(result);
 	}
 

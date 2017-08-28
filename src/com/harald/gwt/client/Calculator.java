@@ -7,31 +7,31 @@ public class Calculator {
 	}
 	
 	private CalculatorListener listener;
-	private double op1;
-	private double op2;
+	private double operand1;
+	private double operand2;
 	private String operator;
 
-	private String multiplication(double op1, double op2) {
-		return "" + (op1 * op2);
+	private String multiplication(double operand1, double operand2) {
+		return "" + (operand1 * operand2);
 	}
 
-	private String modulo(double op1, double op2) {
-		return "" + (op1 % op2);
+	private String modulo(double operand1, double operand2) {
+		return "" + (operand1 % operand2);
 	}
 
-	private String addition(double op1, double op2) {
-		return "" + (op1 + op2);
+	private String addition(double operand1, double operand2) {
+		return "" + (operand1 + operand2);
 	}
 
-	private String subtraction(double op1, double op2) {
-		return "" + (op1 - op2);
+	private String subtraction(double operand1, double operand2) {
+		return "" + (operand1 - operand2);
 	}
 
-	private String division(double op1, double op2) {
-		if (op2 == 0) {
+	private String division(double operand1, double operand2) {
+		if (operand2 == 0) {
 			return "Can´t devide with 0";
 		} else {
-			return "" + (op1 / op2);
+			return "" + (operand1 / operand2);
 		}
 	}
 	
@@ -41,32 +41,32 @@ public class Calculator {
 		
 		switch (this.operator) {
 		case "*": 
-			answer = multiplication(this.op1, this.op2);
+			answer = multiplication(this.operand1, this.operand2);
 			break;
 		case "%": 
-			answer = modulo(this.op1, this.op2);
+			answer = modulo(this.operand1, this.operand2);
 			break;
 		case "+": 
-			answer = addition(this.op1, this.op2);
+			answer = addition(this.operand1, this.operand2);
 			break;
 		case "-": 
-			answer = subtraction(this.op1, this.op2);
+			answer = subtraction(this.operand1, this.operand2);
 			break;
 		case "/": 
-			answer = division(this.op1, this.op2);
+			answer = division(this.operand1, this.operand2);
 			break;
 		default:
 			answer = "Not supported";
 			break;
 		}
 		
-		listener.result(this.op1 + this.operator +this.op2 + " = " + answer);
+		listener.result(this.operand1 + this.operator +this.operand2 + " = " + answer);
 		
 	}
 
-	public void setOps(double op1, double op2, String operator) {
-		this.op1 = op1;
-		this.op2 = op2;
+	public void setOperands(double operand1, double operand2, String operator) {
+		this.operand1 = operand1;
+		this.operand2 = operand2;
 		this.operator = operator;
 	}
 
