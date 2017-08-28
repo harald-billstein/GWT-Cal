@@ -2,7 +2,6 @@ package com.harald.gwt.client;
 
 import java.util.ArrayList;
 
-import com.gargoylesoftware.htmlunit.javascript.host.Event;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -67,10 +66,11 @@ public class Gwt_Calculator implements EntryPoint, CalculatorListener {
 
 	// Checks if a String could be seen as an double
 	private boolean isDouble(String input) {
-		try {
-			Double.parseDouble(input);
+		String regex = "[0-9]+";
+
+		if (input.matches(regex)) {
 			return true;
-		} catch (NumberFormatException e) {
+		} else {
 			return false;
 		}
 	}
@@ -80,7 +80,11 @@ public class Gwt_Calculator implements EntryPoint, CalculatorListener {
 		operand1TextBox.setPixelSize(140, 15);
 		operand2TextBox.setPixelSize(140, 15);
 		operatorTextBox.setPixelSize(10, 15);
+		operatorTextBox.setStyleName("operatorTextBox");
 		operatorTextBox.setAlignment(TextAlignment.CENTER);
+		resultFlexTable.setPixelSize(300, 15);
+		resultFlexTable.setText(0, 0, "History");
+		resultFlexTable.setVisible(false);
 
 		// Setting up keypad
 		int buttonName = 9;
@@ -149,7 +153,7 @@ public class Gwt_Calculator implements EntryPoint, CalculatorListener {
 
 		Button calculateButton = new Button("=");
 		calculateButton.setTitle("Calculate");
-		calculateButton.setStyleName("Equal");
+		calculateButton.setStyleName("equal");
 		calculateButton.setPixelSize(75, 75);
 		buttonsFlexitable.setWidget(4, 3, calculateButton);
 
@@ -177,6 +181,7 @@ public class Gwt_Calculator implements EntryPoint, CalculatorListener {
 		mainPanel.add(buttonsFlexitable);
 
 		RootPanel.get("calc").add(mainPanel);
+		RootPanel.get("history").add(resultPanel);
 	}
 
 	private void setUpListeners() {
@@ -222,7 +227,7 @@ public class Gwt_Calculator implements EntryPoint, CalculatorListener {
 			@Override
 			public void onKeyDown(KeyDownEvent event) {
 				if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-					
+
 					String temp = operand2TextBox.getText().substring((operand1TextBox.getText().length() - 1));
 
 					if (temp.equals("/") || temp.equals("*") || temp.equals("+") || temp.equals("-") || temp.equals("%")
@@ -320,12 +325,12 @@ public class Gwt_Calculator implements EntryPoint, CalculatorListener {
 
 	private void addToResultTable(String history) {
 
-		if (resultFlexTable.getRowCount() == 0) {
-			resultFlexTable.setText(0, 0, "History");
+		if (resultFlexTable.getRowCount() == 1) {
+			resultFlexTable.setVisible(true);
 		}
 
 		int row = resultFlexTable.getRowCount();
-		resultFlexTable.setText(row, 1, history);
+		resultFlexTable.setText(row, 0, history);
 	}
 
 	private void removeLastDigit() {
@@ -339,7 +344,7 @@ public class Gwt_Calculator implements EntryPoint, CalculatorListener {
 
 	@Override
 	public void result(String result) {
-		Window.alert(result);
+		// Window.alert(result);
 		addToResultTable(result);
 	}
 
