@@ -42,6 +42,10 @@ public class Gwt_Calculator implements EntryPoint, CalculatorListener {
 
 		setUpLayout();
 		setUpListeners();
+		
+		// Not implemented
+		Calculator calculator = new Calculator();
+		calculator.shuntYardAlgoritm("3 * 9 - 2 / 2 - 3 + 8 - 8 * 2 + 9");
 	}
 
 	private void calculate() {

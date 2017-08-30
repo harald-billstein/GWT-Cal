@@ -1,12 +1,9 @@
 package com.harald.gwt.client;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Deque;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Stack;
 
-import com.google.gwt.user.client.Window;
 
 public class Calculator {
 
@@ -51,7 +48,6 @@ public class Calculator {
 
 		switch (this.operator) {
 		case "*":
-			shuntYardAlgoritm("test");
 			answer = multiplication(this.operand1, this.operand2);
 			break;
 		case "%":
@@ -89,43 +85,67 @@ public class Calculator {
 		this.listener = null;
 	}
 
-	public void shuntYardAlgoritm(String inFix) {
-
-		inFix = "1 + 2 * 3 - 9";
+	public String shuntYardAlgoritm(String inFix) {
+		
 		StringBuilder outFix = new StringBuilder();
-		Deque<String> stack = new LinkedList<>();
+		Stack<Operator> stack = new Stack<>();
 
 		for (String token : inFix.split(" ")) {
 			if (token.matches(numbersRegex)) {
 				outFix.append(token + " ");
 			} else if (token.matches(operatorRegex)) {
-				if (stack.size() > 0) {
-					if (stack.getFirst().equals("*") || stack.getFirst().equals("/")) {
-						outFix.append(stack.getFirst() + " ");
-						stack.removeFirst();
+
+				Operator TOKEN = convertTokenToEnum(token);
+
+				while (stack.size() > 0) {
+					if (stack.peek().getPrecedence() >= TOKEN.getPrecedence()) {
+						outFix.append(stack.pop().getSign() + " ");
+					} else {
+						break;
 					}
 				}
-
-				if (token.equals("*") || token.equals("/")) {
-					stack.addFirst(token);
-				} else {
-					stack.addLast(token);
-				}
+				stack.add(TOKEN);
 			}
 		}
 
 		while (!stack.isEmpty()) {
-			outFix.append(stack.getFirst() + " ");
-			stack.removeFirst();
+			outFix.append(stack.pop().getSign() + " ");
 		}
 
-		Window.alert("outFix: " + outFix.toString());
 		calculatePostFix(outFix.toString());
+		return outFix.toString();
 	}
 
-	private void calculatePostFix(String postFix) {
+	private Operator convertTokenToEnum(String token) {
+		Operator operator;
+		
+		switch (token) {
+		case "*":
+			operator = Operator.MULTIPLICATION;
+			break;
+		case "/":
+			operator = Operator.DIVISION;
+			break;
+		case "-":
+			operator = Operator.MINUS;
+			break;
+		case "+":
+			operator = Operator.PLUS;
+			break;
+		case "%":
+			operator = Operator.MOUDULUS;
+			break;
+		default:
+			operator = null;
+			break;
+		}
+
+		return operator;
+	}
+
+	private double calculatePostFix(String postFix) {
 		List<String> tokens = new ArrayList<String>();
-		LinkedList<Double> test = new LinkedList<>();
+		Stack<Double> test = new Stack<>();
 
 		for (String token : postFix.split(" ")) {
 			tokens.add(token);
@@ -133,12 +153,14 @@ public class Calculator {
 
 		for (int i = 0; i < tokens.size(); i++) {
 			if (tokens.get(i).matches(numbersRegex)) {
-				test.addFirst((Double.parseDouble(tokens.get(i))));
+				test.push((Double.parseDouble(tokens.get(i))));
 			} else if (tokens.get(i).matches(operatorRegex)) {
-				test.addLast(calculatePostFix(test.pop(), test.pop(), tokens.get(i)));
+				double second = test.pop();
+				double first = test.pop();
+				test.add(calculatePostFix(first, second, tokens.get(i)));
 			}
 		}
-		Window.alert("Answer: " + test.pop() + " size: " + test.size());
+		return test.pop();
 	}
 
 	public double calculatePostFix(double op1, double op2, String operator) {
@@ -165,7 +187,6 @@ public class Calculator {
 			answer = "Not supported";
 			break;
 		}
-		Window.alert(op1 + " " + operator + " " + op2 + " answer: " + answer );
 		return Double.parseDouble(answer);
 	}
 
